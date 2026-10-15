@@ -17,7 +17,12 @@ export async function main(event, context) {
       dataDir: "/tmp/fanmade",
       imageStore: supabaseImageStore(),
     });
-    handler = serverless(app);
+    // Netlify functions must base64-encode image responses. Without this,
+    // serverless-http treats WebP bytes as UTF-8 text and corrupts uploads
+    // even though the endpoint still returns HTTP 200.
+    handler = serverless(app, {
+      binary: ["image/*", "application/octet-stream"],
+    });
   }
   context.callbackWaitsForEmptyEventLoop = false;
   const clean = (path) =>
