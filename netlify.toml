@@ -12,6 +12,11 @@
   NODE_VERSION = "22"
   NPM_FLAGS = "--include=dev"
 
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public,max-age=31536000,immutable"
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/api/:splat"

@@ -199,6 +199,30 @@ export function createApp({
       message: { error: "操作太频繁，请稍后再试" },
     }),
   );
+  // Public catalog responses contain no account-specific data. Keep them
+  // briefly at the edge so every route change does not wait for a cold
+  // serverless function and a new database read. Private/account endpoints
+  // remain no-store from the middleware above.
+  app.use("/api", (req, res, next) => {
+    if (["GET", "HEAD"].includes(req.method)) {
+      const path = req.path;
+      const isPublic =
+        path.startsWith("/catalog/") ||
+        path === "/discover" ||
+        path === "/featured-events" ||
+        path === "/events/search" ||
+        path === "/materials" ||
+        path.startsWith("/users/") ||
+        path.startsWith("/shares/") ||
+        path.startsWith("/events/");
+      if (isPublic)
+        res.set(
+          "Cache-Control",
+          "public, max-age=5, stale-while-revalidate=30",
+        );
+    }
+    next();
+  });
   const authLimit = rateLimit({
     windowMs: 15 * 60000,
     limit: 30,

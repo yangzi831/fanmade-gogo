@@ -1,4 +1,6 @@
 import React, {
+  lazy,
+  Suspense,
   useEffect,
   useState,
   useRef,
@@ -64,8 +66,15 @@ import {
   Reservation,
   MaterialEntry,
 } from "./api";
-import { MaterialStudio, ManualHandoffs } from "./material-studio";
-import { ShareStudio } from "./share-studio";
+const MaterialStudio = lazy(() =>
+  import("./material-studio").then((m) => ({ default: m.MaterialStudio })),
+);
+const ManualHandoffs = lazy(() =>
+  import("./material-studio").then((m) => ({ default: m.ManualHandoffs })),
+);
+const ShareStudio = lazy(() =>
+  import("./share-studio").then((m) => ({ default: m.ShareStudio })),
+);
 import { PublicMaterialCard, MaterialFacts } from "./material-ui";
 import { categories, materialClosure, materialStatus } from "./api";
 import "./styles.css";
@@ -87,6 +96,39 @@ const Context = createContext<{
   notify: (s: string) => void;
   ready: boolean;
 }>({ user: null, refresh: async () => {}, notify: () => {}, ready: false });
+function StudioLoading() {
+  return (
+    <div className="state" aria-live="polite">
+      <LoaderCircle className="spin" />
+      <p>正在打开编辑器…</p>
+    </div>
+  );
+}
+function MaterialStudioSlot(
+  props: React.ComponentProps<typeof MaterialStudio>,
+) {
+  return (
+    <Suspense fallback={<StudioLoading />}>
+      <MaterialStudio {...props} />
+    </Suspense>
+  );
+}
+function ManualHandoffsSlot(
+  props: React.ComponentProps<typeof ManualHandoffs>,
+) {
+  return (
+    <Suspense fallback={<StudioLoading />}>
+      <ManualHandoffs {...props} />
+    </Suspense>
+  );
+}
+function ShareStudioSlot(props: React.ComponentProps<typeof ShareStudio>) {
+  return (
+    <Suspense fallback={<StudioLoading />}>
+      <ShareStudio {...props} />
+    </Suspense>
+  );
+}
 function useApp() {
   return useContext(Context);
 }
@@ -1030,7 +1072,7 @@ function EventPage() {
         <div className="empty">这件物料暂未公开。</div>
       )}
       {shareOpen && (
-        <ShareStudio
+        <ShareStudioSlot
           creator={creator}
           event={e}
           materials={materials}
@@ -1694,7 +1736,7 @@ function PublishPage() {
         <ArrowLeft size={18} />
         返回我的
       </Link>
-      <MaterialStudio
+      <MaterialStudioSlot
         inline
         event={event}
         onChooseEvent={() => setPicker(true)}
@@ -2750,7 +2792,7 @@ function MaterialManager({
         >
           分享清单／已选 {selected.length} 件
         </button>
-        <ManualHandoffs event={event} materials={data} onChange={reload} />
+        <ManualHandoffsSlot event={event} materials={data} onChange={reload} />
       </div>
       <div className="admin-materials">
         {data.map((m) => (
@@ -2811,7 +2853,7 @@ function MaterialManager({
         <div className="empty">还没有物料，发布你的第一件作品吧。</div>
       )}
       {edit && (
-        <MaterialStudio
+        <MaterialStudioSlot
           event={event}
           initial={edit}
           onClose={() => {
@@ -2826,7 +2868,7 @@ function MaterialManager({
         />
       )}
       {share && user && (
-        <ShareStudio
+        <ShareStudioSlot
           creator={user}
           event={event}
           materials={data.filter((m) => m.published)}

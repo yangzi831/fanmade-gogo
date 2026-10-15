@@ -231,7 +231,12 @@ export function EventTile({ event: e }: { event: Event }) {
         className={"ref-event-art " + (e.kind === "剧场" ? "theatre-art" : "")}
       >
         {e.poster ? (
-          <img src={e.poster} alt={e.title + "海报"} />
+          <img
+            src={e.poster}
+            alt={e.title + "海报"}
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <>
             <span>{e.kind || "现场"}</span>
@@ -300,7 +305,11 @@ function FeaturedBanner({
               onClick={() => setPoster(e)}
               aria-label="查看 CAN 完整海报"
             >
-              <img src={e.poster} alt={e.title + "竖版海报"} />
+              <img
+                src={e.poster}
+                alt={e.title + "竖版海报"}
+                decoding="async"
+              />
               <span>查看完整海报 ↗</span>
             </button>
           )}
