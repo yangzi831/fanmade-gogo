@@ -1,5 +1,10 @@
 export function thumbnail(url: string) {
-  return url.startsWith("/uploads/") ? url + (url.includes("?") ? "&" : "?") + "size=thumb" : url;
+  // v=2 bypasses thumbnails that were cached while the Netlify function was
+  // incorrectly sending WebP bytes as UTF-8 text. The server ignores v and
+  // still serves the same generated thumbnail.
+  return url.startsWith("/uploads/")
+    ? url + (url.includes("?") ? "&" : "?") + "size=thumb&v=2"
+    : url;
 }
 // Compress before sending so large phone photos don't consume upload bandwidth.
 export async function compressUpload(file: File): Promise<File> {
