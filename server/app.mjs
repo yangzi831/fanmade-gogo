@@ -1,7 +1,7 @@
 import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import { rateLimit } from "express-rate-limit";
+import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import multer from "multer";
 import bcrypt from "bcryptjs";
 import { randomBytes, randomUUID } from "node:crypto";
@@ -144,6 +144,14 @@ export function createApp({
   imageStore,
 } = {}) {
   const app = express();
+  // Netlify's serverless-http adapter may not populate req.socket.remoteAddress,
+  // so Express cannot always derive req.ip. Keep rate limiting functional while
+  // still separating callers when Netlify forwards a client address.
+  const rateLimitKey = (req) => {
+    const forwarded = req.get("x-nf-client-connection-ip") ||
+      req.get("x-forwarded-for")?.split(",")[0]?.trim();
+    return ipKeyGenerator(req.ip || forwarded || "netlify");
+  };
   app.disable("x-powered-by");
   if (process.env.TRUST_PROXY === "1") app.set("trust proxy", 1);
   const uploads = resolve(dataDir, "uploads");
@@ -185,6 +193,7 @@ export function createApp({
     rateLimit({
       windowMs: 60000,
       limit: 200,
+      keyGenerator: rateLimitKey,
       standardHeaders: "draft-8",
       legacyHeaders: false,
       message: { error: "操作太频繁，请稍后再试" },
@@ -193,11 +202,13 @@ export function createApp({
   const authLimit = rateLimit({
     windowMs: 15 * 60000,
     limit: 30,
+    keyGenerator: rateLimitKey,
     message: { error: "登录或注册尝试过多，请稍后再试" },
   });
   const writeLimit = rateLimit({
     windowMs: 60000,
     limit: 25,
+    keyGenerator: rateLimitKey,
     message: { error: "提交太频繁，请稍后重试" },
   });
   function getUser(req) {
