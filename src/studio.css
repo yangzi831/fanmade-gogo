@@ -224,6 +224,25 @@
   height: 100px;
   object-fit: contain;
 }
+.studio-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  color: #75806e;
+  background: #e8eadf;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.studio-upload .studio-image-placeholder {
+  width: 90px;
+  height: 100px;
+}
+.studio-live-preview .studio-image-placeholder {
+  width: 100%;
+  height: 300px;
+}
 .studio-upload input {
   display: none;
 }

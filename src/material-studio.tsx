@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Event,
   Material,
@@ -35,6 +35,26 @@ const empty = (): Editable => ({
   published: false,
   closed_reason: "draft",
 });
+
+function StudioImage({
+  src,
+  alt,
+  className = "",
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  if (!src || failed)
+    return (
+      <div className={`${className} studio-image-placeholder`} role="img" aria-label={alt}>
+        <span>{failed ? "图片暂时无法加载" : "上传图片后预览"}</span>
+      </div>
+    );
+  return <img className={className} src={src} alt={alt} onError={() => setFailed(true)} />;
+}
 function localTime(iso: string) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -190,7 +210,7 @@ export function MaterialStudio({
             }}
           >
             <div className="studio-upload">
-              <img src={m.image || "/assets/notes.svg"} alt="当前物料预览" />
+              <StudioImage src={m.image} alt="当前物料预览" />
               <label className="button outline">
                 {uploading ? "上传中…" : "上传物料图片"}
                 <input
@@ -362,10 +382,7 @@ export function MaterialStudio({
             </span>
             <article className="material-card">
               <div className="material-image">
-                <img
-                  src={m.image || "/assets/notes.svg"}
-                  alt={m.name || "待命名物料"}
-                />
+                <StudioImage src={m.image} alt={m.name || "待命名物料"} />
               </div>
               <div className="material-info">
                 <span className="pill">
