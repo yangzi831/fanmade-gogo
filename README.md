@@ -2,7 +2,7 @@
 
 **Made by fans. Shared with fans.**
 
-面向音乐节、剧场、演唱会等活动的粉丝自制物料分享、领取和互换网站。分享贴纸、明信片、徽章、应援牌，也可以发布未关联活动的日常物料。
+面向音乐节、剧场、演唱会等活动的自制物料分享、领取和互换网站。分享贴纸、明信片、徽章、应援牌，也可以发布未关联活动的日常物料。
 
 **[访问网站 → fanmade-gogo-share.netlify.app](https://fanmade-gogo-share.netlify.app/)** · [提交问题或建议](https://github.com/yangzi831/fanmade-gogo/issues) · [配置与部署](docs/SUPABASE_SETUP.md)
 
